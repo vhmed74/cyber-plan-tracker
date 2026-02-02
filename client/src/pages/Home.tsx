@@ -4,12 +4,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Circle, Zap, Shield, Cloud, ArrowRight } from 'lucide-react';
+import { CheckCircle2, Circle, Zap, Shield, Cloud, ArrowRight, RotateCcw } from 'lucide-react';
 import { weeks, specializationPaths, Week } from '@/data/plan';
 import { WeekDetailModal } from '@/components/WeekDetailModal';
+import { Header } from '@/components/Header';
+import { StudySchedule } from '@/components/StudySchedule';
+import { useStudy } from '@/contexts/StudyContext';
 
 export default function Home() {
-  const [completedWeeks, setCompletedWeeks] = useState<number[]>([]);
+  const { completedWeeks, toggleWeekCompletion, resetAllData } = useStudy();
   const [currentWeek, setCurrentWeek] = useState(1);
   const [selectedWeek, setSelectedWeek] = useState<Week | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,30 +30,28 @@ export default function Home() {
     setSelectedWeek(null);
   };
 
-  const toggleWeekCompletion = (weekNumber: number) => {
-    setCompletedWeeks(prev =>
-      prev.includes(weekNumber)
-        ? prev.filter(w => w !== weekNumber)
-        : [...prev, weekNumber]
-    );
-  };
-
   const handleToggleCompleteInModal = () => {
     if (selectedWeek) {
       toggleWeekCompletion(selectedWeek.week);
     }
   };
 
+  const handleResetProgress = () => {
+    if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+      resetAllData();
+    }
+  };
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'beginner':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
       case 'intermediate':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
       case 'advanced':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
     }
   };
 
@@ -68,7 +69,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+      <Header />
+
       {/* Hero Section */}
       <section
         className="relative h-96 bg-cover bg-center flex items-center justify-center overflow-hidden"
@@ -124,14 +127,26 @@ export default function Home() {
       {/* Tabs Section */}
       <section className="container mx-auto px-4 pb-12">
         <Tabs defaultValue="weeks" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-4 mb-8">
             <TabsTrigger value="weeks">12 Weeks</TabsTrigger>
+            <TabsTrigger value="schedule">Schedule</TabsTrigger>
             <TabsTrigger value="specialization">Specialization</TabsTrigger>
             <TabsTrigger value="resources">Resources</TabsTrigger>
           </TabsList>
 
           {/* Weeks Tab */}
           <TabsContent value="weeks" className="space-y-4">
+            <div className="flex justify-end mb-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleResetProgress}
+                className="gap-2 text-destructive hover:text-destructive"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Reset Progress
+              </Button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {weeks.map((week) => {
                 const isCompleted = completedWeeks.includes(week.week);
@@ -139,7 +154,7 @@ export default function Home() {
                   <Card
                     key={week.week}
                     className={`cursor-pointer transition-all hover:shadow-lg ${
-                      isCompleted ? 'border-green-500 bg-green-50' : 'border-border'
+                      isCompleted ? 'border-green-500 bg-green-50 dark:bg-green-950/20' : 'border-border'
                     }`}
                     onClick={() => openWeekDetail(week)}
                   >
@@ -190,6 +205,11 @@ export default function Home() {
                 );
               })}
             </div>
+          </TabsContent>
+
+          {/* Schedule Tab */}
+          <TabsContent value="schedule" className="space-y-4">
+            <StudySchedule />
           </TabsContent>
 
           {/* Specialization Tab */}
