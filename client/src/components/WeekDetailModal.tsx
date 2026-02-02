@@ -103,10 +103,10 @@ export function WeekDetailModal({
             </ul>
           </div>
 
-          {/* Resources */}
+          {/* Main Resources */}
           {(week.resources.arabic || week.resources.english) && (
             <div>
-              <h3 className="font-semibold text-foreground mb-3">Learning Resources</h3>
+              <h3 className="font-semibold text-foreground mb-3">Main Learning Resources</h3>
               <div className="space-y-2">
                 {week.resources.arabic && (
                   <a
@@ -134,6 +134,58 @@ export function WeekDetailModal({
             </div>
           )}
 
+          {/* YouTube Channels */}
+          {week.youtubeChannels.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                <span className="text-lg">▶️</span> YouTube Channels
+              </h3>
+              <div className="space-y-2">
+                {week.youtubeChannels.map((channel, idx) => (
+                  <a
+                    key={idx}
+                    href={channel.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg hover:shadow-md transition-shadow"
+                  >
+                    <div>
+                      <p className="font-medium text-foreground text-sm">{channel.name}</p>
+                      <p className="text-xs text-muted-foreground">{channel.language === 'arabic' ? 'Arabic' : 'English'}</p>
+                    </div>
+                    <ExternalLink className="w-4 h-4 text-primary flex-shrink-0" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Free Books */}
+          {week.freeBooks.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                <span className="text-lg">📚</span> Free Books & Guides
+              </h3>
+              <div className="space-y-2">
+                {week.freeBooks.map((book, idx) => (
+                  <a
+                    key={idx}
+                    href={book.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg hover:shadow-md transition-shadow"
+                  >
+                    <div>
+                      <p className="font-medium text-foreground text-sm">{book.title}</p>
+                      <p className="text-xs text-muted-foreground">{book.format === 'pdf' ? 'PDF' : book.format === 'html' ? 'HTML' : 'Web'}</p>
+                    </div>
+                    <ExternalLink className="w-4 h-4 text-primary flex-shrink-0" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Action Button */}
           <div className="flex gap-2 pt-4 border-t border-border">
             <Button
@@ -144,7 +196,7 @@ export function WeekDetailModal({
                   : 'bg-primary hover:bg-primary/90'
               }`}
             >
-              {isCompleted ? '✓ Mark as Incomplete' : 'Mark as Complete'}
+              {isCompleted ? 'Mark as Incomplete' : 'Mark as Complete'}
             </Button>
             <Button variant="outline" onClick={onClose}>
               Close
