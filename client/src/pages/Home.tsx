@@ -5,13 +5,27 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Circle, Zap, Shield, Cloud, ArrowRight } from 'lucide-react';
-import { weeks, specializationPaths } from '@/data/plan';
+import { weeks, specializationPaths, Week } from '@/data/plan';
+import { WeekDetailModal } from '@/components/WeekDetailModal';
 
 export default function Home() {
   const [completedWeeks, setCompletedWeeks] = useState<number[]>([]);
   const [currentWeek, setCurrentWeek] = useState(1);
+  const [selectedWeek, setSelectedWeek] = useState<Week | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const progressPercentage = (completedWeeks.length / weeks.length) * 100;
+
+  const openWeekDetail = (week: Week) => {
+    setSelectedWeek(week);
+    setCurrentWeek(week.week);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedWeek(null);
+  };
 
   const toggleWeekCompletion = (weekNumber: number) => {
     setCompletedWeeks(prev =>
@@ -19,6 +33,12 @@ export default function Home() {
         ? prev.filter(w => w !== weekNumber)
         : [...prev, weekNumber]
     );
+  };
+
+  const handleToggleCompleteInModal = () => {
+    if (selectedWeek) {
+      toggleWeekCompletion(selectedWeek.week);
+    }
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -121,10 +141,7 @@ export default function Home() {
                     className={`cursor-pointer transition-all hover:shadow-lg ${
                       isCompleted ? 'border-green-500 bg-green-50' : 'border-border'
                     }`}
-                    onClick={() => {
-                      toggleWeekCompletion(week.week);
-                      setCurrentWeek(week.week);
-                    }}
+                    onClick={() => openWeekDetail(week)}
                   >
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
@@ -165,32 +182,9 @@ export default function Home() {
                           </ul>
                         </div>
                       </div>
-                      {(week.resources.arabic || week.resources.english) && (
-                        <div className="mt-3 pt-3 border-t border-border">
-                          <div className="flex gap-2 flex-wrap">
-                            {week.resources.arabic && (
-                              <a
-                                href={week.resources.arabic}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-primary hover:underline flex items-center gap-1"
-                              >
-                                Arabic <ArrowRight className="w-3 h-3" />
-                              </a>
-                            )}
-                            {week.resources.english && (
-                              <a
-                                href={week.resources.english}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-primary hover:underline flex items-center gap-1"
-                              >
-                                English <ArrowRight className="w-3 h-3" />
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      )}
+                      <div className="mt-3 pt-3 border-t border-border">
+                        <p className="text-xs text-muted-foreground">Click to view full details</p>
+                      </div>
                     </CardContent>
                   </Card>
                 );
@@ -305,6 +299,15 @@ export default function Home() {
           </TabsContent>
         </Tabs>
       </section>
+
+      {/* Week Detail Modal */}
+      <WeekDetailModal
+        week={selectedWeek}
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        isCompleted={selectedWeek ? completedWeeks.includes(selectedWeek.week) : false}
+        onToggleComplete={handleToggleCompleteInModal}
+      />
     </div>
   );
 }
